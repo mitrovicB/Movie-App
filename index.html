@@ -5,8 +5,24 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Movie App</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <div class="tab">
+        <button class="tabLinks" onClick="openTab(event, 'search-screen')">Search</button>
+        <button class="tabLinks" onClick="openTab(event, 'my-list-screen')">My list</button>
+    </div>
+
+    <div id="search-screen" class="tab-content">
+        <h3>Search</h3>
+        <p>London is the capital city of England.</p>
+    </div>
     
+    <div id="my-list-screen" class="tab-content">
+        <h3>My List</h3>
+        <p>Paris is the capital of France.</p>
+    </div>
+
+    <script src="script.js"></script>
 </body>
 </html>
