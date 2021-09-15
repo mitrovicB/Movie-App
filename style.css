@@ -28,3 +28,33 @@ div.tab button.active {
     border: 1px solid #ccc;
     border-top: none;
   }
+
+/* Search Page */
+
+.search-bar {
+    background-color: #f1f1f1;
+    border-radius: 10px;
+    max-width: 400px;
+    margin: 5px;
+}
+
+.input-icons i {
+    position: absolute;
+}
+  
+.input-icons {
+    width: 100%;
+    margin-bottom: 10px;
+}
+  
+.icon {
+    padding: 10px;
+    min-width: 40px;
+}
+  
+.input-field {
+    width: 100%;
+    padding: 10px;
+    text-align: center;
+    border-radius: 10px;
+}

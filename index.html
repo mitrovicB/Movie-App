@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Movie App</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 </head>
 <body>
     <div class="tab">
@@ -13,11 +14,22 @@
         <button class="tabLinks" onClick="openTab(event, 'my-list-screen')">My list</button>
     </div>
 
+    <!-- Search tab -->
     <div id="search-screen" class="tab-content">
-        <h3>Search</h3>
-        <p>London is the capital city of England.</p>
+        <div class="search-bar">
+            <div class="input-icons">
+                <i class="fa fa-search icon"></i>
+                <input class="input-field" type="text">
+            </div>
+        </div>
+        
+        <div>
+            Movie list
+        </div>
+        
     </div>
     
+    <!-- My List tab -->
     <div id="my-list-screen" class="tab-content">
         <h3>My List</h3>
         <p>Paris is the capital of France.</p>
