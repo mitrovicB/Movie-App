@@ -58,3 +58,22 @@ div.tab button.active {
     text-align: center;
     border-radius: 10px;
 }
+
+ul.movie-list {
+    list-style-type: none;
+    display: grid;
+    height: 400px;
+    justify-content: left;
+
+}
+
+.movie-poster {
+    width: 50px;
+    height: 50px;
+    margin: 20px;
+}
+
+.movie-info {
+    text-align: center;
+    margin-top: -10px;
+}
