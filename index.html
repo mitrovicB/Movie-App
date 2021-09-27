@@ -5,41 +5,15 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Movie App</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="./css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 </head>
 <body>
     <div class="tab">
-        <button class="tabLinks" onClick="openTab(event, 'search-screen')">Search</button>
-        <button class="tabLinks" onClick="openTab(event, 'my-list-screen')">My list</button>
+        <button class="tabLinks" id="searchPage">Search</button>
+        <button class="tabLinks" id="myListPage">My list</button>
     </div>
-
-    <!-- Search tab -->
-    <div id="search-screen" class="tab-content">
-        <div class="search-bar">
-            <div class="input-icons">
-                <i class="fa fa-search icon"></i>
-                <input id="movie-search" class="input-field" type="text" placeholder="type name of the movie">
-            </div>
-        </div>
-
-        <div id="movies">
-            <ul id="movie-list" class="movie-list">
-                
-            </ul>
-        </div>
-        
-        <div>
-            <button>&#60; Back</button>
-            <button>Next &#62;</button>
-        </div>
-    </div>
-    
-    <!-- My List tab -->
-    <div id="my-list-screen" class="tab-content">
-        <h3>My List</h3>
-        <p>Paris is the capital of France.</p>
-    </div>
+    <div id="movieApp"></div>
 
     <script src="./js/script.js"></script>
     <script src="./js/search.js"></script>
