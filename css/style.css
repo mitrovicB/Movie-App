@@ -22,13 +22,13 @@
 }
 
 .tab button {
-        background-color: inherit;
-        float: left;
-        outline: none;
-        cursor: pointer;
-        padding: 14px 16px;
-        transition: 0.3s;
-        font-size: 14px;
+    background-color: inherit;
+    float: left;
+    outline: none;
+    cursor: pointer;
+    padding: 14px 16px;
+    transition: 0.3s;
+    font-size: 14px;
 }
 
 .tab button:hover {
@@ -63,7 +63,7 @@
 ul.movie-list {
     list-style-type: none;
     display: grid;
-    height: 400px;
+    height: 100%;
     justify-content: left;
     margin-top: 20px;
 }
@@ -84,11 +84,19 @@ img {
 }
 
 
-
 .movie-info {
     margin: 10px
 }
 
 .movie-screen {
     display: block;
+}
+
+
+/****************
+***Pagination ***
+******************/
+
+.pagers {
+    display: none;
 }

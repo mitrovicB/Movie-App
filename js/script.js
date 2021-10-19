@@ -22,11 +22,12 @@ let app = {
           </ul>
       </div>
       
-      <div class="pagers">
+      <div id="page-buttons" class="pagers">
           <button id="btn-prev" class="btn_prev">&#60; Back</button>
           <button id="btn-next" class="btn_next">Next &#62;</button>
+          page: <span id="page"></span>
+
       </div>
-      page: <span id="page"></span>
       <button id="getOne-btn">Get one</button>
       <div id="my-movie"></div>
   </div>`.trim(),
@@ -41,7 +42,14 @@ let app = {
     const btn_prev = document.getElementById('btn-prev');
     btn_prev.onclick = this.prevPage.bind(this, page);
   },
-
+  myListPage: function() {
+    document.getElementById(this.containerId).innerHTML = this.myListTemplate;
+  },
+  myListTemplate: `
+    <div id="myList">
+      <p>Here goes my list</p>
+    </div>
+  `.trim(),
   getMovies: function() {
     let movie = document.getElementById("movie-search").value;
     console.log("movie you are searching for: " + movie);
@@ -89,7 +97,8 @@ let app = {
       }
     })
     .then((data) => {
-      console.log(data);
+      console.log(data.totalResults);
+      if (data.totalResults === 0) console.log(data.Error);
       this.displayMovies(data, this.currentPage);
     })
     .catch((error) => console.error("FETCH ERROR:", error)); 
@@ -97,27 +106,29 @@ let app = {
   
   displayMovies: function(data, page) {
     console.log("in display: " + page)
-
+    document.getElementById('page-buttons').style.display = "block";
     const movieList = document.getElementById('movie-list');
     let page_span = document.getElementById("page");
     movieList.innerHTML = "";
     const movies = data.Search;
     console.log(movies);
     let dataCount = data.totalResults;
+   
     console.log("number of Data: " + dataCount);
     let numOfPages = this.numPages(dataCount, this.moviesPerPage);
 
     // Validate page
     if (page < 1) page = 1;
     if (page > numOfPages) page = numOfPages;
-
+    console.log(page)
     console.log("numOfPages: " + numOfPages);
     console.log("movies length: " + movies.length);
 
-    for (let i = (page - 1) * this.moviesPerPage; i < (page * this.moviesPerPage) && i < movies.length; i++) {
+    page_span.innerHTML = page + "/" + numOfPages;
+
+    for (let i = 0; i < (page * this.moviesPerPage) && i < movies.length; i++) {
       console.log(i);
       console.log(movies[i]);
-      page_span.innerHTML = page + "/" + numOfPages;
       movieList.innerHTML += `
         <li id=${movies[i].imdbID}>
           <img src=${movies[i].Poster} />
@@ -127,7 +138,6 @@ let app = {
        `
       }
   },
-
   numPages: function(data, records_per_page) {
       return Math.ceil(data / records_per_page);
   },
@@ -144,7 +154,6 @@ let app = {
     } else {
       this.currentPage--;
       return this.getMovies(this.currentPage);
-      console.log(this.currentPage);
     }
     
   },
@@ -159,10 +168,6 @@ let app = {
     console.log(link);
   },
 
-  myListPage: function() {
-    document.getElementById(this.containerId).innerHTML = this.movieListTemplate;
-    this.createMyList();
-  },
   createMyList: function() {
     document.getElementById('search-screen').style.display = 'none';
     let myArr = ["joker", "batman", "monster"];
