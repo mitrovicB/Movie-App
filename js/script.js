@@ -1,8 +1,5 @@
 window.onclick = function(event) {
-  let modal = document.getElementById('myModal');
-  if (event.target == modal) {
-    modal.style.display = "none";
-  }
+    document.getElementById('myModal').style.display = 'none';
 }
 
 let app = {
@@ -11,7 +8,7 @@ let app = {
   API_URL: "http://www.omdbapi.com/?",
   currentPage: 1,
   moviesPerPage: 10,
-  isInFavorites: false,
+  onSearchPage: true,
   movieListTemplate: `
     <div id="search-screen" class="tab-content active">
       <div class="search-bar">
@@ -26,7 +23,7 @@ let app = {
       </div>
 
       <div id="page-buttons" class="pagers">
-          <button id="btn-prev" class="btn_prev">&#60; Back</button>
+          <button id="btn-prev" class="btn_prev" disabled>&#60; Back</button>
           <button id="btn-next" class="btn_next">Next &#62;</button><br>
           page: <span id="page"></span>
       </div>
@@ -42,13 +39,16 @@ let app = {
     btn_prev.onclick = this.prevPage.bind(this);
   },
   myListPage: function() {
+    this.onSearchPage = false;
     document.getElementById(this.containerId).innerHTML = this.myListTemplate;
     const myList = document.getElementById('myList');
 
     let retrievedData = localStorage.getItem("movieID");
     let favorites = JSON.parse(retrievedData);
     console.log("retrieved: " + favorites);
-   
+    if (favorites == "") {
+      document.getElementById(this.containerId).innerHTML = "No movies on your list";
+    }
     for (i = 0; i < favorites.length; i++) {
      console.log(favorites[i]);
      let movieUrl = "http://www.omdbapi.com/?i=" + favorites[i] + this.API_KEY;
@@ -69,7 +69,9 @@ let app = {
           <img src=${data.Poster} />
           <h2>${data.Title}</h2>
           <h3>${data.Year}<h3>
+          <button>Remove</button>
         </li>
+        <h3 id="message"></h3>
       `
     })
     .catch((error) => console.error("FETCH ERROR:", error)); 
@@ -84,7 +86,6 @@ let app = {
     console.log("currentPage is: " + this.currentPage);
     if (movie.length > 2) {
       this.fetchData(movie, this.currentPage);
-      this.show = false;
     }
   },
   fetchData: function(movie) {
@@ -107,6 +108,8 @@ let app = {
   },
   displayMovies: function(data, page) {
     console.log("in display: " + page)
+    this.onSearchPage = true;
+
     document.getElementById('page-buttons').style.display = "block";
     const movieList = document.getElementById('movie-list');
     let page_span = document.getElementById("page");
@@ -130,6 +133,7 @@ let app = {
     for (let i = 0; i < (page * this.moviesPerPage) && i < movies.length; i++) {
       console.log(i);
       console.log(movies[i]);
+  
       movieList.innerHTML += `
         <li id=${movies[i].imdbID} class="list-item" onclick="app.getMovieInfo(this.id)">
           <img src=${movies[i].Poster} />
@@ -137,7 +141,20 @@ let app = {
           <h3>${movies[i].Year}<h3>
         </li>
        `
+
+       if (this.isInStorage(movies[i].imdbID)) {
+        console.log('IN STORAGE');
+        app.addStar(movies[i].imdbID);
+      };
     }
+  },
+  addStar: function(id) {
+    let star = document.getElementById(id);
+    let element = document.createElement('p');
+    element.innerHTML = "★";
+    element.classList.add("favorites-star");
+    element.style.display = 'block';
+    star.appendChild(element);
   },
   getMovieInfo: function(id) {
     console.log(id);
@@ -159,10 +176,8 @@ let app = {
     .catch((error) => console.error("FETCH ERROR:", error)); 
   },
   openModal: function(data) {
-    const modal = document.getElementById("myModal");
-    modal.style.display = "block";
-
-    modal.innerHTML = `
+    app.toggleModal();
+    document.getElementById('myModal').innerHTML = `
       <div class="modal-content">
         <h1 id="title">${data.Title}</h1>
         <p id="year">${data.Year}<p>
@@ -179,19 +194,34 @@ let app = {
         </div>
       </div>
     `
-  let movieId = data.imdbID;
-  const storageBtn = document.getElementById('my-btn');
+    let movieId = data.imdbID;
+    const storageBtn = document.getElementById('my-btn');
 
-    if (this.isInStorage(movieId)) {
-      storageBtn.innerHTML = "Remove";
-      storageBtn.addEventListener('click', () => {
-        this.removeFromFavorites(movieId);
-      })
+      if (this.isInStorage(movieId)) {
+        storageBtn.innerHTML = "Remove";
+        storageBtn.addEventListener('click', () => {
+          this.removeFromFavorites(movieId);
+        })
+      } else {
+        storageBtn.innerHTML = "Add to my List";
+        storageBtn.addEventListener('click', () => {
+          this.saveToFavorites(movieId);
+        });
+      }
+  },
+  pageCheck: function() {
+    if (this.onSearchPage) {
+      window.onload = this.getMovies();
     } else {
-      storageBtn.innerHTML = "Add to my List";
-      storageBtn.addEventListener('click', () => {
-        this.saveToFavorites(movieId);
-      });
+      window.onload = this.myListPage();
+    }
+  },
+  toggleModal: function() {
+    let movieModal =  document.getElementById('myModal');
+    if (movieModal.style.display === "none") {
+      movieModal.style.display = "block";
+    } else {
+      movieModal.style.display = "none";
     }
   },
   isInStorage: function(id) {
@@ -203,32 +233,33 @@ let app = {
     let filtered = movieArr.filter(item => item !== id);
     console.log('filtered: ' + filtered)
     localStorage.setItem('movieID', JSON.stringify(filtered));
-    document.getElementById('myModal').style.display = "none";
-    this.myListPage();
+    this.pageCheck();
   },
   saveToFavorites: function(id) {
    let movieArr = JSON.parse(window.localStorage.getItem("movieID")) || [];
 
-    if(movieArr.indexOf(id) == -1 && typeof(Storage) !== "undefined"){
+    if (movieArr.indexOf(id) == -1 && typeof(Storage) !== "undefined"){
       movieArr.push(id);
       localStorage.setItem("movieID", JSON.stringify(movieArr));
       console.log("movies: " + movieArr);
     } else {
       console.log("Sorry, your browser does not support Web Storage...");
     }
+    this.pageCheck();
   },
   numPages: function(data, records_per_page) {
     return Math.ceil(data / records_per_page);
   },
   nextPage: function(currentPage) {
     this.currentPage++;
+    document.getElementById('btn-prev').disabled = false;
     console.log(this.currentPage);
     return this.getMovies(this.currentPage);
   },
   prevPage: function(currentPage) {
-    if (this.currentPage = 0) {
-      document.getElementById('btn-prev').disabled = "true";
-      return;
+    if (this.currentPage === 1) {
+      document.getElementById('btn-prev').disabled = true;
+      return
     } else {
       this.currentPage--;
       return this.getMovies(this.currentPage);

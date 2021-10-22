@@ -6,6 +6,7 @@
 .tab {
     overflow: hidden;
     background-color: #f1f1f1;
+    width: 50%;
 }
 
 .tab-content {
@@ -17,7 +18,7 @@
 .search-bar {
     background-color: #f1f1f1;
     border-radius: 10px;
-    max-width: 300px;
+    max-width: 500px;
     margin: 5px;
 }
 
@@ -29,6 +30,7 @@
     padding: 14px 16px;
     transition: 0.3s;
     font-size: 14px;
+    width: 50%;
 }
 
 .tab button:hover {
@@ -120,7 +122,6 @@ img {
   }
   
   /* Modal Content */
-
   .modal-content {
     background-color: #fefefe;
     margin: auto;
@@ -143,3 +144,15 @@ img {
     text-decoration: none;
     cursor: pointer;
   }
+
+/************
+*** STAR ****
+**************/
+.favorites-star {
+    color: #F4B30A;
+    text-shadow: 0 0 1px #F48F0A;
+    float: right;
+    margin-left: 2px;
+    display: none;
+    font-size: 30px;
+}
