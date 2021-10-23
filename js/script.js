@@ -10,22 +10,22 @@ let app = {
   moviesPerPage: 10,
   onSearchPage: true,
   movieListTemplate: `
-    <div id="search-screen" class="tab-content active">
+    <div class="tab-content">
       <div class="search-bar">
           <div class="input-icons">
               <i class="fa fa-search icon"></i>
-              <input id="movie-search" class="input-field" type="text" placeholder="type name of the movie">
+              <input id="movie-search" class="input-field" type="text" placeholder="Search for the movie" />
           </div>
       </div>
 
-      <div id="movies">
+      <div>
           <ul id="movie-list" class="movie-list"></ul>
       </div>
 
       <div id="page-buttons" class="pagers">
           <button id="btn-prev" class="btn_prev" disabled>&#60; Back</button>
-          <button id="btn-next" class="btn_next">Next &#62;</button><br>
-          page: <span id="page"></span>
+          <button id="btn-next" class="btn_next">Next &#62;</button>
+         <span id="page" class="page_no"></span>
       </div>
     </div>`.trim(),
   searchPage: function() {
@@ -66,10 +66,10 @@ let app = {
       if (data.totalResults === 0) console.log(data.Error);
       myList.innerHTML += `
         <li id=${data.imdbID} class="list-item" onclick="app.getMovieInfo(this.id)">
-          <img src=${data.Poster} />
+          <img src=${data.Poster} class="movie-img" />
           <h2>${data.Title}</h2>
-          <h3>${data.Year}<h3>
-          <button>Remove</button>
+          <p>${data.Year}</p>
+          <button class="btn-style">Remove</button>
         </li>
         <h3 id="message"></h3>
       `
@@ -78,7 +78,9 @@ let app = {
     }
   },
   myListTemplate: `
-      <ul id="myList"></ul>
+    <div class="tab-content">
+      <ul id="myList" class="movie-list"></ul>
+    </div>
     `.trim(),
   getMovies: function() {
     let movie = document.getElementById("movie-search").value;
@@ -107,12 +109,12 @@ let app = {
     .catch((error) => console.error("FETCH ERROR:", error)); 
   },
   displayMovies: function(data, page) {
-    console.log("in display: " + page)
     this.onSearchPage = true;
-
     document.getElementById('page-buttons').style.display = "block";
+
     const movieList = document.getElementById('movie-list');
     let page_span = document.getElementById("page");
+    
     movieList.innerHTML = "";
     const movies = data.Search;
     console.log(movies);
@@ -136,9 +138,9 @@ let app = {
   
       movieList.innerHTML += `
         <li id=${movies[i].imdbID} class="list-item" onclick="app.getMovieInfo(this.id)">
-          <img src=${movies[i].Poster} />
+          <img src=${movies[i].Poster} class="movie-img"/>
           <h2>${movies[i].Title}</h2>
-          <h3>${movies[i].Year}<h3>
+          <p>${movies[i].Year}</p>
         </li>
        `
 
@@ -181,8 +183,8 @@ let app = {
       <div class="modal-content">
         <h1 id="title">${data.Title}</h1>
         <p id="year">${data.Year}<p>
-        <div class="image-container">
-            <img class="movie-image" src=${data.Poster} id="movie-poster"/>
+        <div>
+            <img class="movie-poster" src=${data.Poster} id="movie-poster"/>
         </div>
         <p class="movie-info" id="release">Released: ${data.Released}</p>
         <p class="movie-info" id="genre">Genre: ${data.Genre}</p>
@@ -190,7 +192,7 @@ let app = {
         <p class="movie-info" id="actors">Actors: ${data.Actors}</p>
         <p class="movie-info" id="plot">Plot: ${data.Plot}</p>
         <div>
-          <button id="my-btn"></button>
+          <button id="my-btn" class="btn-style"></button>
         </div>
       </div>
     `
@@ -259,7 +261,6 @@ let app = {
   prevPage: function(currentPage) {
     if (this.currentPage === 1) {
       document.getElementById('btn-prev').disabled = true;
-      return
     } else {
       this.currentPage--;
       return this.getMovies(this.currentPage);
