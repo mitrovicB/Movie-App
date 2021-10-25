@@ -12,28 +12,40 @@ body {
     font-size: 12px;
 }
 
-.tab {
-    overflow: hidden;
-    width: 250px;
-    margin: 20px 20px;
+.tabs {
+    text-align: left;
+    list-style: none;
+    margin: 20px 12px 0px;
+    width: 450px;
 }
 
-.tab-links {
-    border-radius: 20px;
-    margin: 0;
+.tabs button {
+    height: 30px;
+    width: 30%;
+    margin: 0 -2px;
+    border: 1px solid #AAA;
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+    background: #ECECEC;
+    display: inline;
 }
+
+button.active {
+    background-color:  rgb(209, 209, 209);
+}
+
 .tab-content {
     border: 1px solid #ccc;
     height: 100%;
     background-color: #f3f2f2;
-  }
+}
 
 .main-screen {
     background-color: white;
     border: 1px solid black;
     height: fit-content;
     width: 600px;
-    margin: 20px;
+    margin: 0px 10px;
 }
 
 .search-bar {
@@ -41,20 +53,6 @@ body {
     border-radius: 10px;
     max-width: 100%;
     margin: 30px;
-}
-
-.tab button {
-    float: left;
-    outline: none;
-    cursor: pointer;
-    padding: 5px;
-    font-size: 12px;
-    transition: 0.3s;
-    width: 120px;
-}
-
-.tab button:hover {
-    background-color: rgba(99, 99, 99, 0.247);
 }
 
 .input-icons i {

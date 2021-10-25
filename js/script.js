@@ -28,6 +28,17 @@ let app = {
          <span id="page" class="page_no"></span>
       </div>
     </div>`.trim(),
+    toggleActiveTab: function(id_rem, id_add) {
+      const header = document.getElementById('header');
+      let btns = header.getElementsByClassName('tab-link');
+      for (let i = 0; i < btns.length; i++) {
+        btns[i].addEventListener("click", function() {
+        let current = document.getElementsByClassName("active");
+        current[0].className = current[0].className.replace(" active", "");
+        this.className += " active";
+        });
+      }
+    },
   searchPage: function() {
     document.getElementById(this.containerId).innerHTML = this.movieListTemplate;
     document.getElementById('searchPage').onclick = this.searchPage.bind(this);
@@ -37,15 +48,16 @@ let app = {
     btn_next.onclick = this.nextPage.bind(this);
     const btn_prev = document.getElementById('btn-prev');
     btn_prev.onclick = this.prevPage.bind(this);
+    this.toggleActiveTab();
   },
   myListPage: function() {
-    this.onSearchPage = false;
     document.getElementById(this.containerId).innerHTML = this.myListTemplate;
-    const myList = document.getElementById('myList');
+    this.toggleActiveTab();
+    this.onSearchPage = false;
 
+    const myList = document.getElementById('myList');
     let retrievedData = localStorage.getItem("movieID");
     let favorites = JSON.parse(retrievedData);
-    console.log("retrieved: " + favorites);
     if (favorites == "") {
       document.getElementById(this.containerId).innerHTML = "No movies on your list";
     }
@@ -81,7 +93,7 @@ let app = {
     <div class="tab-content">
       <ul id="myList" class="movie-list"></ul>
     </div>
-    `.trim(),
+  `.trim(),
   getMovies: function() {
     let movie = document.getElementById("movie-search").value;
     console.log("movie you are searching for: " + movie);
