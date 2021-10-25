@@ -71,9 +71,10 @@ button.active {
   
 .input-field {
     width: 550px;
-    padding: 10px;
-    text-align: center;
-    border-radius: 10px;
+    padding: 10px 25px;
+    font-size: 12px;
+    text-align: left;
+    border-radius: 90px;
     height: 30px;
 }
 
@@ -114,7 +115,6 @@ h2, h1 {
 .movie-info {
     margin: 10px 0;
 }
-
 
 /*** Pagination ***/
 
