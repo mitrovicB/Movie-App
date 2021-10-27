@@ -1,7 +1,3 @@
-window.onclick = function(event) {
-    document.getElementById('myModal').style.display = 'none';
-}
-
 let app = {
   containerId: 'movieApp',
   API_KEY: "&apikey=9a1ebd23",
@@ -21,51 +17,84 @@ let app = {
       <div>
           <ul id="movie-list" class="movie-list"></ul>
       </div>
-
       <div id="page-buttons" class="pagers">
-          <button id="btn-prev" class="btn_prev" disabled>&#60; Back</button>
-          <button id="btn-next" class="btn_next">Next &#62;</button>
-         <span id="page" class="page_no"></span>
+        <button id="btn-prev" class="btn_prev">&#60; Back</button>
+        <button id="btn-next" class="btn_next">Next &#62;</button>
+        <span id="page" class="page_no"></span>
       </div>
     </div>`.trim(),
-    toggleActiveTab: function(id_rem, id_add) {
-      const header = document.getElementById('header');
-      let btns = header.getElementsByClassName('tab-link');
-      for (let i = 0; i < btns.length; i++) {
-        btns[i].addEventListener("click", function() {
-        let current = document.getElementsByClassName("active");
-        current[0].className = current[0].className.replace(" active", "");
-        this.className += " active";
-        });
-      }
-    },
-  searchPage: function() {
+  toggleActiveTab: function(page) {
+    page = 1;
+    const header = document.getElementById('header');
+    let tab_btns = header.getElementsByClassName('tab-link');
+    for (let i = 0; i < tab_btns.length; i++) {
+      tab_btns[i].addEventListener("click", function() {
+      let current = document.getElementsByClassName("active");
+      current[0].className = current[0].className.replace(" active", "");
+      this.className += " active";
+      });
+    }
+  },
+  searchPage: function(page) {
+    this.toggleActiveTab();
+  
     document.getElementById(this.containerId).innerHTML = this.movieListTemplate;
     document.getElementById('searchPage').onclick = this.searchPage.bind(this);
     document.getElementById('myListPage').onclick = this.myListPage.bind(this);
     document.getElementById('movie-search').onkeyup = this.getMovies.bind(this);
-    const btn_next = document.getElementById('btn-next');
-    btn_next.onclick = this.nextPage.bind(this);
-    const btn_prev = document.getElementById('btn-prev');
-    btn_prev.onclick = this.prevPage.bind(this);
-    this.toggleActiveTab();
   },
-  myListPage: function() {
-    document.getElementById(this.containerId).innerHTML = this.myListTemplate;
+  splitArrayIntoChunks: function(arr, chunkSize) {
+    const res = [];
+      for (let i = 0; i < arr.length; i += chunkSize) {
+          const chunk = arr.slice(i, i + chunkSize);
+          res.push(chunk);
+      }
+    return res;
+  },
+  myListPage: function(page) {
     this.toggleActiveTab();
+    document.getElementById(this.containerId).innerHTML = this.myListTemplate;
     this.onSearchPage = false;
+    page = this.currentPage;
 
-    const myList = document.getElementById('myList');
-    let retrievedData = localStorage.getItem("movieID");
-    let favorites = JSON.parse(retrievedData);
-    if (favorites == "") {
-      document.getElementById(this.containerId).innerHTML = "No movies on your list";
-    }
-    for (i = 0; i < favorites.length; i++) {
-     console.log(favorites[i]);
-     let movieUrl = "http://www.omdbapi.com/?i=" + favorites[i] + this.API_KEY;
-    console.log(movieUrl);
-    fetch(movieUrl)
+
+    const retrievedData = localStorage.getItem("movieID");
+    let favoriteMovies = JSON.parse(retrievedData);
+      if (favoriteMovies === null) {
+        document.getElementById(this.containerId).innerHTML = "No movies on your list";
+        return;
+      }
+
+      if(favoriteMovies.length >= this.moviesPerPage) {
+        this.showPageButtons();
+      }
+
+    const numOfPages = this.numPages(favoriteMovies.length, this.moviesPerPage);
+    console.log("number of pages: " + numOfPages+ " and page: " + page);
+ 
+   
+    let arrayInChunks = this.splitArrayIntoChunks(favoriteMovies, this.moviesPerPage, page);
+
+    let move = 0;
+    console.log(arrayInChunks[move]);
+
+      if (page === 1) {
+        this.apiCall(arrayInChunks,move, page);
+      }
+      else if(page > 1) {
+        move++;
+        this.apiCall(arrayInChunks, move, page);
+      } 
+  },
+  apiCall: function(chunk, move, page) {
+    for(i=0; i < chunk[move].length; i++) {
+      console.log(chunk[move][i]);
+      let movieUrl = "http://www.omdbapi.com/?i=" + chunk[move][i] + this.API_KEY;
+      this.fetchDataFavorites(movieUrl, myList, page);
+      }
+  },
+  fetchDataFavorites: function(url, list, page) {
+    fetch(url)
     .then((response) => {
       if (response.ok) {
         return response.json(); 
@@ -75,36 +104,42 @@ let app = {
     })
     .then((data) => {
       console.log(data);
-      if (data.totalResults === 0) console.log(data.Error);
-      myList.innerHTML += `
-        <li id=${data.imdbID} class="list-item" onclick="app.getMovieInfo(this.id)">
-          <img src=${data.Poster} class="movie-img" />
-          <h2>${data.Title}</h2>
-          <p>${data.Year}</p>
-          <button class="btn-style">Remove</button>
-        </li>
-        <h3 id="message"></h3>
-      `
+        if (data.totalResults === 0) console.log(data.Error);
+      const myList = document.getElementById('myList');
+     this.createList(myList, data);
     })
     .catch((error) => console.error("FETCH ERROR:", error)); 
-    }
+  },
+  createList: function(list, movie_data) {
+    list.innerHTML += `
+    <li id=${movie_data.imdbID} class="list-item" onclick="app.getMovieInfo(this.id)">
+      <img src=${movie_data.Poster} class="movie-img" />
+      <h2>${movie_data.Title}</h2>
+      <p>${movie_data.Year}</p>
+      <button class="modal-btn">Remove</button>
+    </li>    <h3 id="message"></h3>
+    `
   },
   myListTemplate: `
     <div class="tab-content">
       <ul id="myList" class="movie-list"></ul>
     </div>
-  `.trim(),
+    <div id="page-buttons" class="pagers">
+        <button id="btn-prev" class="btn_prev" disabled>&#60; Back</button>
+        <button id="btn-next" class="btn_next">Next &#62;</button>
+     </div>`.trim(),
   getMovies: function() {
     let movie = document.getElementById("movie-search").value;
     console.log("movie you are searching for: " + movie);
-    console.log("currentPage is: " + this.currentPage);
+
+    const searchUrl = this.API_URL + "s=" + movie + "&page=" + this.currentPage + this.API_KEY;
+    console.log("movie url: " + searchUrl);
+
     if (movie.length > 2) {
-      this.fetchData(movie, this.currentPage);
+      this.fetchDataSearch(searchUrl, this.currentPage);
     }
   },
-  fetchData: function(movie) {
-    const url = this.API_URL + "s=" + movie + "&page=" + this.currentPage + this.API_KEY;
-    console.log("movie url: " + url);
+  fetchDataSearch: function(url) {
     fetch(url)
     .then((response) => {
       if (response.ok) {
@@ -122,8 +157,7 @@ let app = {
   },
   displayMovies: function(data, page) {
     this.onSearchPage = true;
-    document.getElementById('page-buttons').style.display = "block";
-
+    this.showPageButtons();
     const movieList = document.getElementById('movie-list');
     let page_span = document.getElementById("page");
     
@@ -132,7 +166,7 @@ let app = {
     console.log(movies);
     let dataCount = data.totalResults;
    
-    console.log("number of Data: " + dataCount);
+    console.log("Number of Data: " + dataCount);
     let numOfPages = this.numPages(dataCount, this.moviesPerPage);
 
     // Validate page
@@ -145,9 +179,7 @@ let app = {
     page_span.innerHTML = page + "/" + numOfPages;
 
     for (let i = 0; i < (page * this.moviesPerPage) && i < movies.length; i++) {
-      console.log(i);
       console.log(movies[i]);
-  
       movieList.innerHTML += `
         <li id=${movies[i].imdbID} class="list-item" onclick="app.getMovieInfo(this.id)">
           <img src=${movies[i].Poster} class="movie-img"/>
@@ -155,11 +187,11 @@ let app = {
           <p>${movies[i].Year}</p>
         </li>
        `
-
+      
        if (this.isInStorage(movies[i].imdbID)) {
         console.log('IN STORAGE');
         app.addStar(movies[i].imdbID);
-      };
+      }
     }
   },
   addStar: function(id) {
@@ -171,10 +203,11 @@ let app = {
     star.appendChild(element);
   },
   getMovieInfo: function(id) {
-    console.log(id);
+    console.log("id number: " + id);
     let movieUrl = this.API_URL + "i=" + id + this.API_KEY;
     console.log(movieUrl);
-   
+    window.onclick = app.hideModal();
+
     fetch(movieUrl)
     .then((response) => {
       if (response.ok) {
@@ -203,51 +236,46 @@ let app = {
         <p class="movie-info" id="director">Director: ${data.Director}</p>
         <p class="movie-info" id="actors">Actors: ${data.Actors}</p>
         <p class="movie-info" id="plot">Plot: ${data.Plot}</p>
-        <div>
-          <button id="my-btn" class="btn-style"></button>
+        <div class="modal-btn-position">
+          <button id="movie-modal-btn" class="modal-btn"></button>
         </div>
       </div>
     `
     let movieId = data.imdbID;
-    const storageBtn = document.getElementById('my-btn');
-
-      if (this.isInStorage(movieId)) {
-        storageBtn.innerHTML = "Remove";
-        storageBtn.addEventListener('click', () => {
-          this.removeFromFavorites(movieId);
-        })
-      } else {
-        storageBtn.innerHTML = "Add to my List";
-        storageBtn.addEventListener('click', () => {
-          this.saveToFavorites(movieId);
-        });
-      }
-  },
-  pageCheck: function() {
-    if (this.onSearchPage) {
-      window.onload = this.getMovies();
-    } else {
-      window.onload = this.myListPage();
-    }
-  },
-  toggleModal: function() {
-    let movieModal =  document.getElementById('myModal');
-    if (movieModal.style.display === "none") {
-      movieModal.style.display = "block";
-    } else {
-      movieModal.style.display = "none";
-    }
+    const storageBtn = document.getElementById('movie-modal-btn');
+    this.checkStorage(movieId, storageBtn);
   },
   isInStorage: function(id) {
     let movieArr = JSON.parse(localStorage.getItem('movieID'));
-    if (movieArr.includes(id)) return true;
+    if (movieArr === null) {
+      return false;
+    }
+    if (movieArr.includes(id))  {
+      return true;
+    }
   },
+  checkStorage: function(id, buttonName) {
+    if (this.isInStorage(id)) {
+      buttonName.innerHTML = "Remove";
+      buttonName.addEventListener('click', () => {
+        return this.removeFromFavorites(id);
+      })
+    } else {
+      buttonName.innerHTML = "Add to my List";
+      buttonName.addEventListener('click', () => {
+       return this.saveToFavorites(id);
+      });
+    }
+  },
+
   removeFromFavorites: function(id) {
     let movieArr = JSON.parse(localStorage.getItem('movieID'));
     let filtered = movieArr.filter(item => item !== id);
     console.log('filtered: ' + filtered)
     localStorage.setItem('movieID', JSON.stringify(filtered));
-    this.pageCheck();
+    this.hideModal();
+
+    this.checkPage();
   },
   saveToFavorites: function(id) {
    let movieArr = JSON.parse(window.localStorage.getItem("movieID")) || [];
@@ -259,25 +287,53 @@ let app = {
     } else {
       console.log("Sorry, your browser does not support Web Storage...");
     }
-    this.pageCheck();
+    this.getMovies();
+    //this.checkPage();
+  },
+  checkPage: function(page) {
+    if (this.onSearchPage) {
+      this.getMovies(page);
+    } else {
+      this.myListPage(page);
+    }
+  },
+  toggleModal: function() {
+    const movieModal =  document.getElementById('myModal');
+    if (this.hideModal) {
+      movieModal.style.display = "block";
+    } else {
+      this.hideModal(movieModal);
+    }
+  },
+  hideModal: function(modal) {
+    document.getElementById('myModal').style.display = 'none';
+  },
+  showPageButtons: function() {
+    document.getElementById('page-buttons').style.display = "block";
+    const btn_next = document.getElementById('btn-next');
+    btn_next.onclick = this.nextPage.bind(this);
+    const btn_prev = document.getElementById('btn-prev');
+    btn_prev.onclick = this.prevPage.bind(this);
   },
   numPages: function(data, records_per_page) {
     return Math.ceil(data / records_per_page);
   },
   nextPage: function(currentPage) {
     this.currentPage++;
+    if (this.currentPage === 1) {
     document.getElementById('btn-prev').disabled = false;
-    console.log(this.currentPage);
-    return this.getMovies(this.currentPage);
+    }
+    return this.checkPage(this.currentPage);
   },
   prevPage: function(currentPage) {
     if (this.currentPage === 1) {
       document.getElementById('btn-prev').disabled = true;
     } else {
       this.currentPage--;
-      return this.getMovies(this.currentPage);
+      return this.checkPage(this.currentPage);
     }
   }
 }
 
 app.searchPage();
+document.body.onclick = app.hideModal;
